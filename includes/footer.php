@@ -28,7 +28,7 @@
             <div class="footer-col">
                 <h4>Get in Touch</h4>
                 <ul>
-                    <li><i class="fas fa-map-marker-alt"></i> Quezon City, PH</li>
+                    <li><i class="fas fa-map-marker-alt"></i> Panglong City, Myanmar</li>
                     <li><i class="fas fa-phone"></i> +63 912 345 6789</li>
                     <li><i class="fas fa-envelope"></i> hello@avocadonail.com</li>
                 </ul>

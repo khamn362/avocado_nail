@@ -16,6 +16,8 @@ $staff = $pdo->query("SELECT * FROM staff WHERE status='available' ORDER BY name
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -32,6 +34,7 @@ $staff = $pdo->query("SELECT * FROM staff WHERE status='available' ORDER BY name
             <li><a href="#services">Services</a></li>
             <li><a href="#staff">Our Team</a></li>
             <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
             <li><a href="/nail/auth/login.php">Sign In</a></li>
             <li><a href="/nail/auth/register.php" class="btn-nav">Get Started</a></li>
         </ul>
@@ -192,10 +195,70 @@ $staff = $pdo->query("SELECT * FROM staff WHERE status='available' ORDER BY name
                     <div class="about-feature"><i class="fas fa-check-circle"></i><span>Hygienic & Sterile</span></div>
                     <div class="about-feature"><i class="fas fa-check-circle"></i><span>Fashion-Forward Designs</span></div>
                 </div>
+                <div class="about-location" style="margin-top:1.5rem;display:flex;align-items:center;gap:0.75rem;padding:1rem;background:var(--avocado-50);border-radius:12px;border:1px solid var(--avocado-100);">
+                    <div style="width:42px;height:42px;background:var(--avocado-100);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-map-marker-alt" style="color:var(--avocado-600);font-size:1rem;"></i>
+                    </div>
+                    <div>
+                        <p style="font-weight:600;color:var(--avocado-900);margin:0;font-size:0.95rem;">Our Location</p>
+                        <p style="font-size:0.85rem;color:var(--text-light);margin:0;">Panglong City, Myanmar</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- contact -->
+<section class="section" id="contact" style="background:var(--avocado-50);">
+    <div class="container">
+        <div class="section-header">
+            <span class="tag">Contact Us</span>
+            <h2>Visit <span>Our Studio</span></h2>
+            <p>We'd love to see you! Drop by for a consultation or book your appointment today.</p>
+        </div>
+        <div id="contactMap" style="max-width:700px;margin:0 auto;height:400px;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);"></div>
+    </div>
+</section>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+#contactMap .leaflet-control-zoom { border:none !important; box-shadow:0 2px 6px rgba(0,0,0,0.3) !important; border-radius:4px !important; overflow:hidden; }
+#contactMap .leaflet-control-zoom a { width:32px !important; height:32px !important; line-height:32px !important; font-size:18px !important; color:#333 !important; background:#fff !important; border-bottom:1px solid #ccc !important; }
+#contactMap .leaflet-control-zoom a:hover { background:#f4f4f4 !important; }
+#contactMap .leaflet-control-zoom-in { border-radius:4px 4px 0 0 !important; }
+#contactMap .leaflet-control-zoom-out { border-radius:0 0 4px 4px !important; border-bottom:none !important; }
+#contactMap .leaflet-control-attribution { background:rgba(255,255,255,0.8) !important; font-size:10px !important; padding:2px 5px !important; }
+#contactMap .leaflet-popup-content-wrapper { border-radius:8px !important; box-shadow:0 2px 10px rgba(0,0,0,0.25) !important; }
+#contactMap .leaflet-popup-tip { box-shadow:0 2px 6px rgba(0,0,0,0.15) !important; }
+#contactMap .leaflet-popup-content { margin:10px 14px !important; font-family:Arial,sans-serif !important; }
+</style>
+<script>
+(function(){
+    var map = L.map('contactMap', {
+        center: [20.9917, 97.5208],
+        zoom: 15,
+        zoomControl: true
+    });
+    map.zoomControl.setPosition('topright');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+    var icon = L.divIcon({
+        className: 'custom-marker',
+        html: '<div style="background:#e53935;width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;"><div style="transform:rotate(45deg);color:#fff;font-size:14px;"><i class="fas fa-map-marker-alt"></i></div></div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30]
+    });
+    L.marker([20.9917, 97.5208], {icon: icon}).addTo(map)
+        .bindPopup('<div style="font-family:Arial,sans-serif;min-width:180px;"><b style="font-size:14px;">Avocado Nail &amp; Model Studio</b><br><span style="color:#666;font-size:12px;">Panglong City, Myanmar</span></div>').openPopup();
+    map.on('click', function(){
+        window.open('https://www.google.com/maps?q=20.9917,97.5208', '_blank');
+    });
+})();
+</script>
 
 <!-- book -->
 <section class="cta-section">

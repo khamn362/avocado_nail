@@ -7,10 +7,9 @@ $title = 'Dashboard';
 
 // Stats
 $total_customers = $pdo->query("SELECT COUNT(*) FROM users WHERE role='customer'")->fetchColumn();
-$total_appointments = $pdo->query("SELECT COUNT(*) FROM appointments")->fetchColumn();
+$completed_appointments = $pdo->query("SELECT COUNT(*) FROM appointments WHERE status = 'completed'")->fetchColumn();
 $today_appointments = $pdo->query("SELECT COUNT(*) FROM appointments WHERE appointment_date = CURDATE()")->fetchColumn();
 $monthly_revenue = $pdo->query("SELECT COALESCE(SUM(s.price), 0) FROM appointments a JOIN services s ON a.service_id = s.id WHERE a.status = 'completed' AND MONTH(a.appointment_date) = MONTH(CURDATE()) AND YEAR(a.appointment_date) = YEAR(CURDATE())")->fetchColumn();
-$available_staff = $pdo->query("SELECT COUNT(*) FROM staff WHERE status = 'available'")->fetchColumn();
 
 // Recent appointments
 $stmt = $pdo->query("SELECT a.*, u.full_name as customer_name, s.name as service_name, st.name as staff_name 
@@ -18,7 +17,7 @@ $stmt = $pdo->query("SELECT a.*, u.full_name as customer_name, s.name as service
                       JOIN users u ON a.customer_id = u.id 
                       JOIN services s ON a.service_id = s.id 
                       JOIN staff st ON a.staff_id = st.id 
-                      ORDER BY a.created_at DESC LIMIT 5");
+                      ORDER BY a.created_at DESC");
 $recent_appointments = $stmt->fetchAll();
 
 $total_revenue = $pdo->query("SELECT COALESCE(SUM(s.price), 0) FROM appointments a JOIN services s ON a.service_id = s.id WHERE a.status = 'completed'")->fetchColumn();
@@ -26,7 +25,7 @@ $total_revenue = $pdo->query("SELECT COALESCE(SUM(s.price), 0) FROM appointments
 require_once '../includes/header.php';
 ?>
 <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-emerald-900">Admin Dashboard</h1>
+    <h1 class="text-2xl font-bold text-blue-900">Admin Dashboard</h1>
 
     <!-- Upcoming Appointment Alert -->
     <div id="upcomingAlert" class="hidden">
@@ -57,11 +56,11 @@ require_once '../includes/header.php';
         <div class="bg-white rounded-xl shadow-sm border p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">Total Appointments</p>
-                    <p class="text-3xl font-bold text-gray-800"><?php echo $total_appointments; ?></p>
+                    <p class="text-sm text-gray-500">Completed Appointments</p>
+                    <p class="text-3xl font-bold text-gray-800"><?php echo $completed_appointments; ?></p>
                 </div>
-                <div class="bg-green-100 p-3 rounded-lg">
-                    <i class="fas fa-calendar-check text-green-500 text-2xl"></i>
+                <div class="bg-blue-100 p-3 rounded-lg">
+                    <i class="fas fa-calendar-check text-blue-500 text-2xl"></i>
                 </div>
             </div>
         </div>
@@ -76,43 +75,16 @@ require_once '../includes/header.php';
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500">Available Staff</p>
-                    <p class="text-3xl font-bold text-gray-800"><?php echo $available_staff; ?>/5</p>
-                </div>
-                <div class="bg-purple-100 p-3 rounded-lg">
-                    <i class="fas fa-user-check text-purple-500 text-2xl"></i>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl shadow-sm border p-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Monthly Revenue</h3>
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500">This Month</p>
-                    <p class="text-3xl font-bold text-green-600">MMK<?php echo number_format($monthly_revenue, 2); ?></p>
-                </div>
-                <div class="bg-green-100 p-3 rounded-lg">
-                    <i class="fas fa-coins text-green-500 text-2xl"></i>
-                </div>
-            </div>
+            <p class="text-3xl font-bold text-blue-600">MMK<?php echo number_format($monthly_revenue, 2); ?></p>
         </div>
         <div class="bg-white rounded-xl shadow-sm border p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Total Revenue (All Time)</h3>
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500">Total Earnings</p>
-                    <p class="text-3xl font-bold text-green-600">MMK<?php echo number_format($total_revenue, 2); ?></p>
-                </div>
-                <div class="bg-green-100 p-3 rounded-lg">
-                    <i class="fas fa-chart-line text-green-500 text-2xl"></i>
-                </div>
-            </div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Total Revenue</h3>
+            <p class="text-3xl font-bold text-blue-600">MMK<?php echo number_format($total_revenue, 2); ?></p>
         </div>
     </div>
 
@@ -144,7 +116,7 @@ require_once '../includes/header.php';
                                     'pending' => 'bg-yellow-100 text-yellow-700',
                                     'confirmed' => 'bg-blue-100 text-blue-700',
                                     'in_progress' => 'bg-purple-100 text-purple-700',
-                                    'completed' => 'bg-green-100 text-green-700',
+                                    'completed' => 'bg-blue-100 text-blue-700',
                                     'cancelled' => 'bg-red-100 text-red-700',
                                     default => 'bg-gray-100 text-gray-700'
                                 }; ?>">
@@ -163,7 +135,7 @@ require_once '../includes/header.php';
 </div>
 <script>
 function fetchUpcoming() {
-    fetch('/nail/includes/upcoming_appointments_api.php')
+    fetch('/nail_salon/includes/upcoming_appointments_api.php')
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.error || !data.appointments.length) {
@@ -197,14 +169,14 @@ function fetchUpcoming() {
                 html += '        ' + timeBadge;
                 html += '      </div>';
                 html += '      <p class="text-xs text-gray-500 mt-0.5">' + escapeHtml(apt.service_name) + ' &mdash; ' + apt.time + ' - ' + apt.end_time + '</p>';
-                html += '      <p class="text-xs text-gray-400 mt-0.5"><i class="fas fa-user-tie mr-1"></i>' + escapeHtml(apt.staff_name) + (apt.seat_label ? ' &middot; <i class="fas fa-chair mr-1"></i>' + escapeHtml(apt.seat_label) : '') + '</p>';
+                html += '      <p class="text-xs text-gray-400 mt-0.5"><i class="fas fa-user-tie mr-1"></i>' + escapeHtml(apt.staff_name) + '</p>';
                 if (apt.customer_phone) {
                     html += '      <p class="text-xs text-gray-400 mt-0.5"><i class="fas fa-phone mr-1"></i>' + escapeHtml(apt.customer_phone) + '</p>';
                 }
                 html += '    </div>';
                 html += '  </div>';
                 html += '  <div class="flex items-center gap-2 ml-13 sm:ml-0">';
-                html += '    <button type="button" class="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1 confirm-btn" data-apt-id="' + apt.id + '" data-customer="' + escapeHtml(apt.customer_name) + '" data-service="' + escapeHtml(apt.service_name) + '" data-time="' + apt.time + '">';
+                html += '    <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1 confirm-btn" data-apt-id="' + apt.id + '" data-customer="' + escapeHtml(apt.customer_name) + '" data-service="' + escapeHtml(apt.service_name) + '" data-time="' + apt.time + '">';
                 html += '      <i class="fas fa-check"></i> Confirm';
                 html += '    </button>';
                 html += '    <button type="button" class="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1 no-show-btn" data-apt-id="' + apt.id + '" data-customer="' + escapeHtml(apt.customer_name) + '" data-service="' + escapeHtml(apt.service_name) + '" data-time="' + apt.time + '">';
@@ -227,7 +199,7 @@ function fetchUpcoming() {
                         html: 'Is <strong>' + customer + '</strong> coming for <strong>' + service + '</strong> at <strong>' + time + '</strong>?',
                         icon: 'question',
                         showCancelButton: true,
-                        confirmButtonColor: '#059669',
+                        confirmButtonColor: '#3578c0',
                         cancelButtonColor: '#6b7280',
                         confirmButtonText: 'Yes, Confirmed',
                         cancelButtonText: 'Cancel'
@@ -235,7 +207,7 @@ function fetchUpcoming() {
                         if (result.isConfirmed) {
                             var form = document.createElement('form');
                             form.method = 'POST';
-                            form.action = '/nail/admin/appointments.php';
+                            form.action = '/nail_salon/admin/appointments.php';
                             form.innerHTML = '<input type="hidden" name="action" value="update_status"><input type="hidden" name="id" value="' + aptId + '"><input type="hidden" name="status" value="confirmed">';
                             document.body.appendChild(form);
                             form.submit();
@@ -264,7 +236,7 @@ function fetchUpcoming() {
                         if (result.isConfirmed) {
                             var form = document.createElement('form');
                             form.method = 'POST';
-                            form.action = '/nail/admin/appointments.php';
+                            form.action = '/nail_salon/admin/appointments.php';
                             form.innerHTML = '<input type="hidden" name="action" value="update_status"><input type="hidden" name="id" value="' + aptId + '"><input type="hidden" name="status" value="cancelled">';
                             document.body.appendChild(form);
                             form.submit();

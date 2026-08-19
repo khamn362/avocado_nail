@@ -17,13 +17,11 @@ $stmt = $pdo->prepare("
     SELECT a.id, a.appointment_date, a.appointment_time, a.end_time, a.status, a.notes,
            u.full_name as customer_name, u.phone as customer_phone,
            s.name as service_name, s.duration,
-           st.name as staff_name,
-           st2.label as seat_label
+           st.name as staff_name
     FROM appointments a
     JOIN users u ON a.customer_id = u.id
     JOIN services s ON a.service_id = s.id
     JOIN staff st ON a.staff_id = st.id
-    LEFT JOIN seats st2 ON a.seat_id = st2.id
     WHERE a.appointment_date = ?
       AND a.appointment_time >= ?
       AND a.appointment_time <= ?
@@ -50,7 +48,6 @@ foreach ($appointments as $apt) {
         'customer_phone' => $apt['customer_phone'],
         'service_name' => $apt['service_name'],
         'staff_name' => $apt['staff_name'],
-        'seat_label' => $apt['seat_label'],
         'time' => date('h:i A', strtotime($apt['appointment_time'])),
         'end_time' => date('h:i A', strtotime($apt['end_time'])),
         'duration' => $apt['duration'],

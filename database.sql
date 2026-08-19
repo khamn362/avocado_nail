@@ -52,6 +52,8 @@ CREATE TABLE staff (
     photo VARCHAR(255),
     phone VARCHAR(20),
     specialization VARCHAR(255),
+    experience TEXT,
+    certification TEXT,
     working_hours_start TIME DEFAULT '09:00:00',
     working_hours_end TIME DEFAULT '18:00:00',
     status ENUM('available', 'busy', 'off') DEFAULT 'available',
@@ -59,31 +61,12 @@ CREATE TABLE staff (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Seats table
-CREATE TABLE seats (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    seat_number INT NOT NULL UNIQUE,
-    label VARCHAR(50) DEFAULT NULL,
-    status ENUM('active', 'maintenance') DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- Insert default seats
-INSERT INTO seats (seat_number, label) VALUES
-(1, 'Seat 1'),
-(2, 'Seat 2'),
-(3, 'Seat 3'),
-(4, 'Seat 4'),
-(5, 'Seat 5');
-
 -- Appointments table
 CREATE TABLE appointments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     service_id INT NOT NULL,
     staff_id INT NOT NULL,
-    seat_id INT DEFAULT NULL,
     appointment_date DATE NOT NULL,
     appointment_time TIME NOT NULL,
     end_time TIME NOT NULL,
@@ -93,8 +76,7 @@ CREATE TABLE appointments (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE,
-    FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE,
-    FOREIGN KEY (seat_id) REFERENCES seats(id) ON DELETE SET NULL
+    FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE
 );
 
 -- Notifications table
@@ -149,7 +131,7 @@ CREATE TABLE salon_settings (
 
 -- Insert default salon settings
 INSERT INTO salon_settings (setting_key, setting_value) VALUES
-('salon_name', 'Avocado Nail Studio'),
+('salon_name', 'Bluberry Nail Art Studio'),
 ('currency', 'MMK');
 
 -- Insert default admin account
@@ -162,8 +144,7 @@ INSERT INTO categories (name, description) VALUES
 ('Manicure', 'Professional hand nail care and styling'),
 ('Pedicure', 'Professional foot nail care and styling'),
 ('Nail Art', 'Creative and artistic nail designs'),
-('Nail Extensions', 'Artificial nail lengthening and shaping'),
-
+('Nail Extensions', 'Artificial nail lengthening and shaping');
 
 -- Insert sample staff
 INSERT INTO staff (name, phone, specialization, working_hours_start, working_hours_end, status) VALUES

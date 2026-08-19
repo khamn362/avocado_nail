@@ -68,10 +68,10 @@ foreach ($appointments as $apt) {
 }
 
 $statusMeta = [
-    'pending'     => ['label' => 'Pending',     'icon' => 'fa-hourglass-half', 'color' => 'var(--avocado-400)', 'bg' => '#fef9c3', 'border' => '#fde68a'],
+    'pending'     => ['label' => 'Pending',     'icon' => 'fa-hourglass-half', 'color' => 'var(--blueberry-400)', 'bg' => '#fef9c3', 'border' => '#fde68a'],
     'confirmed'   => ['label' => 'Confirmed',   'icon' => 'fa-check-circle',   'color' => '#2563eb', 'bg' => '#dbeafe', 'border' => '#93c5fd'],
     'in_progress' => ['label' => 'In Progress', 'icon' => 'fa-spinner',        'color' => '#9333ea', 'bg' => '#f3e8ff', 'border' => '#c4b5fd'],
-    'completed'   => ['label' => 'Completed',   'icon' => 'fa-circle-check',   'color' => 'var(--avocado-600)', 'bg' => 'var(--avocado-50)', 'border' => 'var(--avocado-200)'],
+    'completed'   => ['label' => 'Completed',   'icon' => 'fa-circle-check',   'color' => 'var(--blueberry-600)', 'bg' => 'var(--blueberry-50)', 'border' => 'var(--blueberry-200)'],
     'cancelled'   => ['label' => 'Cancelled',   'icon' => 'fa-circle-xmark',   'color' => '#dc2626', 'bg' => '#fef2f2', 'border' => '#fecaca'],
 ];
 
@@ -80,42 +80,42 @@ $visibleGroups = array_filter($displayOrder, function($s) use ($grouped) { retur
 ?>
 
 <style>
-.apt-page{background:linear-gradient(180deg,var(--avocado-50) 0%,#f9fafb 100%);min-height:100vh;padding:2rem 0 3rem}
+.apt-page{background:linear-gradient(180deg,var(--blueberry-50) 0%,#f9fafb 100%);min-height:100vh;padding:2rem 0 3rem}
 
 .apt-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
-.apt-head h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--avocado-900);margin:0}
-.apt-head h1 span{color:var(--avocado-600)}
-.apt-new{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.4rem;border-radius:12px;background:linear-gradient(135deg,var(--avocado-500),var(--avocado-600));color:white;font-weight:700;font-size:.9rem;border:none;cursor:pointer;text-decoration:none;transition:all .3s;box-shadow:0 4px 14px rgba(93,132,51,.25)}
-.apt-new:hover{background:linear-gradient(135deg,var(--avocado-600),var(--avocado-700));transform:translateY(-2px);box-shadow:0 8px 20px rgba(93,132,51,.3)}
+.apt-head h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--blueberry-900);margin:0}
+.apt-head h1 span{color:var(--blueberry-600)}
+.apt-new{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.4rem;border-radius:12px;background:linear-gradient(135deg,var(--blueberry-500),var(--blueberry-600));color:white;font-weight:700;font-size:.9rem;border:none;cursor:pointer;text-decoration:none;transition:all .3s;box-shadow:0 4px 14px rgba(53,120,192,.25)}
+.apt-new:hover{background:linear-gradient(135deg,var(--blueberry-600),var(--blueberry-700));transform:translateY(-2px);box-shadow:0 8px 20px rgba(53,120,192,.3)}
 
 .apt-group{margin-bottom:2rem}
 .apt-group-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;cursor:pointer;user-select:none;padding:.5rem 0}
 .apt-group-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
-.apt-group-title{font-weight:700;font-size:1rem;color:var(--avocado-800)}
-.apt-group-count{font-size:.75rem;font-weight:700;padding:.15rem .55rem;border-radius:50px;background:var(--avocado-100);color:var(--avocado-700)}
-.apt-group-toggle{margin-left:auto;font-size:.8rem;color:var(--avocado-400);transition:transform .3s}
+.apt-group-title{font-weight:700;font-size:1rem;color:var(--blueberry-800)}
+.apt-group-count{font-size:.75rem;font-weight:700;padding:.15rem .55rem;border-radius:50px;background:var(--blueberry-100);color:var(--blueberry-700)}
+.apt-group-toggle{margin-left:auto;font-size:.8rem;color:var(--blueberry-400);transition:transform .3s}
 .apt-group-toggle.collapsed{transform:rotate(-90deg)}
 
-.apt-table{width:100%;border:2px solid var(--avocado-100);border-radius:14px;overflow:hidden;background:white}
-.apt-thead{display:grid;grid-template-columns:40px 1.3fr .9fr .9fr .8fr .7fr 100px;padding:.6rem 1rem;background:var(--avocado-50);border-bottom:2px solid var(--avocado-100)}
-.apt-thead span{font-size:.7rem;font-weight:700;color:var(--avocado-700);text-transform:uppercase;letter-spacing:.5px}
+.apt-table{width:100%;border:2px solid var(--blueberry-100);border-radius:14px;overflow:hidden;background:white}
+.apt-thead{display:grid;grid-template-columns:40px 1.3fr .9fr .9fr .8fr .7fr 100px;padding:.6rem 1rem;background:var(--blueberry-50);border-bottom:2px solid var(--blueberry-100)}
+.apt-thead span{font-size:.7rem;font-weight:700;color:var(--blueberry-700);text-transform:uppercase;letter-spacing:.5px}
 .apt-thead span:last-child{text-align:right}
 .apt-tbody{}
 .apt-row{display:grid;grid-template-columns:40px 1.3fr .9fr .9fr .8fr .7fr 100px;padding:.65rem 1rem;align-items:center;border-bottom:1px solid #f3f4f6;transition:background .2s}
 .apt-row:last-child{border-bottom:none}
-.apt-row:hover{background:var(--avocado-50)}
+.apt-row:hover{background:var(--blueberry-50)}
 
 .apt-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .apt-svc{font-weight:600;color:var(--dark);font-size:.88rem}
 .apt-svc small{display:block;font-weight:400;color:var(--text-light);font-size:.72rem;margin-top:.1rem}
 .apt-staff{display:flex;align-items:center;gap:.5rem}
-.apt-staff-avatar{width:30px;height:30px;border-radius:50%;background:var(--avocado-100);display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid var(--avocado-200);flex-shrink:0}
+.apt-staff-avatar{width:30px;height:30px;border-radius:50%;background:var(--blueberry-100);display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid var(--blueberry-200);flex-shrink:0}
 .apt-staff-avatar img{width:100%;height:100%;object-fit:cover}
-.apt-staff-avatar i{color:var(--avocado-500);font-size:.7rem}
+.apt-staff-avatar i{color:var(--blueberry-500);font-size:.7rem}
 .apt-staff-name{font-size:.85rem;color:var(--dark);font-weight:500}
 .apt-date{font-size:.85rem;color:var(--dark)}
 .apt-time{font-size:.85rem;color:var(--text-light)}
-.apt-price{font-weight:700;color:var(--avocado-600);font-size:.88rem;text-align:right}
+.apt-price{font-weight:700;color:var(--blueberry-600);font-size:.88rem;text-align:right}
 .apt-actions{display:flex;justify-content:flex-end;gap:.4rem}
 .apt-btn{padding:.35rem .7rem;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:.3rem}
 .apt-btn-rate{background:#fef9c3;color:#a16207;border:1px solid #fde68a}
@@ -123,18 +123,18 @@ $visibleGroups = array_filter($displayOrder, function($s) use ($grouped) { retur
 .apt-btn-cancel{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
 .apt-btn-cancel:hover{background:#fee2e2}
 
-.apt-pager{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.7rem 1rem;border-top:2px solid var(--avocado-100);background:var(--avocado-50)}
-.apt-page-btn{width:32px;height:32px;border-radius:8px;border:2px solid var(--avocado-200);background:white;color:var(--avocado-700);font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.apt-page-btn:hover:not(:disabled){background:var(--avocado-100);border-color:var(--avocado-400)}
+.apt-pager{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.7rem 1rem;border-top:2px solid var(--blueberry-100);background:var(--blueberry-50)}
+.apt-page-btn{width:32px;height:32px;border-radius:8px;border:2px solid var(--blueberry-200);background:white;color:var(--blueberry-700);font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.apt-page-btn:hover:not(:disabled){background:var(--blueberry-100);border-color:var(--blueberry-400)}
 .apt-page-btn:disabled{opacity:.35;cursor:not-allowed}
-.apt-page-info{font-size:.78rem;font-weight:600;color:var(--avocado-700);min-width:80px;text-align:center}
+.apt-page-info{font-size:.78rem;font-weight:600;color:var(--blueberry-700);min-width:80px;text-align:center}
 
-.apt-empty{background:white;border:2px solid var(--avocado-100);border-radius:14px;padding:3rem;text-align:center}
-.apt-empty i{font-size:2.5rem;color:var(--avocado-300);margin-bottom:1rem;display:block}
-.apt-empty h3{font-weight:700;color:var(--avocado-800);margin:0 0 .4rem;font-size:1.1rem}
+.apt-empty{background:white;border:2px solid var(--blueberry-100);border-radius:14px;padding:3rem;text-align:center}
+.apt-empty i{font-size:2.5rem;color:var(--blueberry-300);margin-bottom:1rem;display:block}
+.apt-empty h3{font-weight:700;color:var(--blueberry-800);margin:0 0 .4rem;font-size:1.1rem}
 .apt-empty p{color:var(--text-light);font-size:.9rem;margin:0 0 1.2rem}
-.apt-empty a{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.5rem;border-radius:10px;background:linear-gradient(135deg,var(--avocado-500),var(--avocado-600));color:white;font-weight:700;font-size:.9rem;text-decoration:none;transition:all .3s}
-.apt-empty a:hover{background:linear-gradient(135deg,var(--avocado-600),var(--avocado-700));transform:translateY(-2px)}
+.apt-empty a{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.5rem;border-radius:10px;background:linear-gradient(135deg,var(--blueberry-500),var(--blueberry-600));color:white;font-weight:700;font-size:.9rem;text-decoration:none;transition:all .3s}
+.apt-empty a:hover{background:linear-gradient(135deg,var(--blueberry-600),var(--blueberry-700));transform:translateY(-2px)}
 
 @media(max-width:768px){
     .apt-thead{display:none}
@@ -203,7 +203,7 @@ $visibleGroups = array_filter($displayOrder, function($s) use ($grouped) { retur
                                 <div class="apt-staff">
                                     <div class="apt-staff-avatar">
                                         <?php if (!empty($apt['staff_photo'])): ?>
-                                            <img src="/nail/assets/uploads/<?php echo htmlspecialchars($apt['staff_photo']); ?>" alt="<?php echo htmlspecialchars($apt['staff_name']); ?>">
+                                            <img src="/nail_salon/assets/uploads/<?php echo htmlspecialchars($apt['staff_photo']); ?>" alt="<?php echo htmlspecialchars($apt['staff_name']); ?>">
                                         <?php else: ?>
                                             <i class="fas fa-user"></i>
                                         <?php endif; ?>

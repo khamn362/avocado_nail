@@ -7,6 +7,20 @@ $title = 'Appointments';
 $message = '';
 $swal_error = '';
 
+// Auto-complete appointments whose service has ended
+$to_complete = $pdo->prepare("SELECT id, customer_id FROM appointments WHERE status IN ('confirmed','in_progress') AND CONCAT(appointment_date, ' ', end_time) <= NOW()");
+$to_complete->execute();
+$completed_list = $to_complete->fetchAll();
+if (!empty($completed_list)) {
+    $ids = array_column($completed_list, 'id');
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $pdo->prepare("UPDATE appointments SET status='completed' WHERE id IN ($placeholders)")->execute($ids);
+    require_once '../includes/notifications.php';
+    foreach ($completed_list as $nc) {
+        createNotification($pdo, $nc['customer_id'], 'status_change', 'Appointment Completed', 'Your appointment has been completed automatically.', $nc['id']);
+    }
+}
+
 // Mark notifications as read when arriving from bell
 if (isset($_GET['mark_read'])) {
     require_once '../includes/notifications.php';
@@ -25,12 +39,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($status === '') {
             $message = 'No status selected.';
         } else {
-            $check = $pdo->prepare("SELECT appointment_date FROM appointments WHERE id = ?");
+            $check = $pdo->prepare("SELECT appointment_date, end_time FROM appointments WHERE id = ?");
             $check->execute([$id]);
             $apt_row = $check->fetch();
 
             if ($apt_row && $apt_row['appointment_date'] < date('Y-m-d')) {
                 $swal_error = 'Cannot change status for past appointments.';
+            } elseif ($status === 'completed' && $apt_row) {
+                $end_datetime = $apt_row['appointment_date'] . ' ' . $apt_row['end_time'];
+                if (strtotime($end_datetime) > time()) {
+                    $remaining = strtotime($end_datetime) - time();
+                    $mins = ceil($remaining / 60);
+                    $swal_error = 'Service has not ended yet. Please wait ' . $mins . ' more minute(s) before marking as completed.';
+                } else {
+                    $stmt = $pdo->prepare("UPDATE appointments SET status=? WHERE id=?");
+                    $stmt->execute([$status, $id]);
+
+                    $apt = $pdo->prepare("SELECT a.*, u.full_name as customer_name FROM appointments a JOIN users u ON a.customer_id = u.id WHERE a.id = ?");
+                    $apt->execute([$id]);
+                    $apt_notif = $apt->fetch();
+                    if ($apt_notif) {
+                        require_once '../includes/notifications.php';
+                        $status_label = ucfirst(str_replace('_', ' ', $status));
+                        $status_message = 'Your appointment has been ' . strtolower($status_label) . '.';
+                        createNotification($pdo, $apt_notif['customer_id'], 'status_change', 'Appointment ' . $status_label, $status_message, $id);
+                    }
+
+                    $message = 'Appointment status updated.';
+                }
             } else {
                 $stmt = $pdo->prepare("UPDATE appointments SET status=? WHERE id=?");
                 $stmt->execute([$status, $id]);
@@ -41,7 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if ($apt_notif) {
                     require_once '../includes/notifications.php';
                     $status_label = ucfirst(str_replace('_', ' ', $status));
-                    createNotification($pdo, $apt_notif['customer_id'], 'status_change', 'Appointment ' . $status_label, 'Your appointment (#' . $id . ') has been ' . $status_label . '.', $id);
+                    $status_message = 'Your appointment has been ' . strtolower($status_label) . '.';
+                    createNotification($pdo, $apt_notif['customer_id'], 'status_change', 'Appointment ' . $status_label, $status_message, $id);
                 }
 
                 $message = 'Appointment status updated.';
@@ -67,15 +104,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 // Filters
 $status_filter = $_GET['status'] ?? '';
 $date_filter = $_GET['date'] ?? '';
+$weekly_filter = $_GET['weekly'] ?? '';
+
+if ($weekly_filter === '1') {
+    $date_from = date('Y-m-d', strtotime('monday this week'));
+    $date_to = date('Y-m-d', strtotime('sunday this week'));
+} else {
+    $date_from = '';
+    $date_to = '';
+}
 
 $sql = "SELECT a.*, u.full_name as customer_name, u.email as customer_email, u.phone as customer_phone,
-        s.name as service_name, s.price as service_price, st.name as staff_name,
-        st2.label as seat_label, st2.seat_number
+        s.name as service_name, s.price as service_price, st.name as staff_name
         FROM appointments a
         JOIN users u ON a.customer_id = u.id
         JOIN services s ON a.service_id = s.id
         JOIN staff st ON a.staff_id = st.id
-        LEFT JOIN seats st2 ON a.seat_id = st2.id
         WHERE 1=1";
 
 $params = [];
@@ -83,7 +127,11 @@ if ($status_filter) {
     $sql .= " AND a.status = ?";
     $params[] = $status_filter;
 }
-if ($date_filter) {
+if ($weekly_filter === '1') {
+    $sql .= " AND a.appointment_date BETWEEN ? AND ?";
+    $params[] = $date_from;
+    $params[] = $date_to;
+} elseif ($date_filter) {
     $sql .= " AND a.appointment_date = ?";
     $params[] = $date_filter;
 }
@@ -99,20 +147,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $appointments = $stmt->fetchAll();
 
-$staff_members = $pdo->query("SELECT * FROM staff WHERE status != 'off'")->fetchAll();
-
-$stmt = $pdo->query("SHOW TABLES LIKE 'seats'");
-if ($stmt->fetch()) {
-    $total_seats = $pdo->query("SELECT COUNT(*) FROM seats WHERE status='active'")->fetchColumn();
-} else {
-    $total_seats = 5;
-}
-
-$check_date = $date_filter ?: date('Y-m-d');
-$seat_q = $pdo->prepare("SELECT COUNT(*) as booked FROM appointments WHERE appointment_date = ? AND status NOT IN ('cancelled')");
-$seat_q->execute([$check_date]);
-$seats_booked = $seat_q->fetch()['booked'];
-$seats_pct = $total_seats > 0 ? min(100, round(($seats_booked / $total_seats) * 100)) : 0;
+$staff_members = $pdo->query("SELECT * FROM staff")->fetchAll();
 
 require_once '../includes/header.php';
 ?>
@@ -134,7 +169,7 @@ require_once '../includes/header.php';
     </div>
 
     <?php if ($message): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg"><?php echo $message; ?></div>
+        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg"><?php echo $message; ?></div>
     <?php endif; ?>
 
     <!-- Filters -->
@@ -156,36 +191,19 @@ require_once '../includes/header.php';
         </div>
         <div>
             <a href="appointments.php" class="inline-block px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200 text-center w-full sm:w-auto">Clear Filters</a>
+            <a href="appointments.php?weekly=1" class="inline-block px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm hover:bg-blue-100 text-center w-full sm:w-auto">Weekly Reset</a>
         </div>
     </form>
-
-    <!-- Seat Usage -->
-    <div class="bg-white rounded-xl shadow-sm border p-4">
-        <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2">
-                <i class="fas fa-chair text-emerald-600"></i>
-                <span class="text-sm font-medium text-gray-700">Seat Usage — <?php echo date('M d, Y', strtotime($check_date)); ?></span>
-            </div>
-            <span class="text-sm font-semibold <?php echo $seats_booked >= $total_seats ? 'text-red-600' : ($seats_pct >= 80 ? 'text-amber-600' : 'text-emerald-600'); ?>">
-                <?php echo $seats_booked; ?> / <?php echo $total_seats; ?> seats
-            </span>
-        </div>
-        <div class="w-full bg-gray-100 rounded-full h-2.5">
-            <div class="h-2.5 rounded-full transition-all duration-500 <?php echo $seats_pct >= 100 ? 'bg-red-500' : ($seats_pct >= 80 ? 'bg-amber-400' : 'bg-emerald-500'); ?>" style="width:<?php echo $seats_pct; ?>%"></div>
-        </div>
-        <p class="text-xs text-gray-400 mt-1"><?php echo $total_seats - $seats_booked; ?> seat<?php echo ($total_seats - $seats_booked) !== 1 ? 's' : ''; ?> remaining for this date. <a href="seats.php" class="text-emerald-600 underline">Manage seats</a></p>
-    </div>
 
     <!-- Appointments Table -->
     <div class="bg-white rounded-xl shadow-sm border overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
                 <tr class="bg-gray-50 border-b">
-                    in <!-- <th class="px-4 py-3 text-left font-medium text-gray-500">#</th> -->
+                    <!-- <th class="px-4 py-3 text-left font-medium text-gray-500">#</th> -->
                     <th class="px-4 py-3 text-left font-medium text-gray-500">Customer</th>
                     <th class="px-4 py-3 text-left font-medium text-gray-500">Service</th>
                     <th class="px-4 py-3 text-left font-medium text-gray-500 hide-mobile">Staff</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500 hide-mobile">Seat</th>
                     <th class="px-4 py-3 text-left font-medium text-gray-500">Date</th>
                     <th class="px-4 py-3 text-left font-medium text-gray-500 hide-mobile">Time</th>
                     <th class="px-4 py-3 text-left font-medium text-gray-500 hide-mobile">Amount</th>
@@ -203,24 +221,15 @@ require_once '../includes/header.php';
                         </td>
                         <td class="px-4 py-3"><?php echo htmlspecialchars($apt['service_name']); ?></td>
                         <td class="px-4 py-3 hide-mobile"><?php echo htmlspecialchars($apt['staff_name']); ?></td>
-                        <td class="px-4 py-3 hide-mobile">
-                            <?php if ($apt['seat_label']): ?>
-                            <span class="px-2 py-1 text-xs rounded-full bg-emerald-50 text-emerald-700 font-medium">
-                                <i class="fas fa-chair mr-1"></i><?php echo htmlspecialchars($apt['seat_label']); ?>
-                            </span>
-                            <?php else: ?>
-                            <span class="text-gray-400 text-xs">—</span>
-                            <?php endif; ?>
-                        </td>
                         <td class="px-4 py-3"><?php echo date('M d, Y', strtotime($apt['appointment_date'])); ?></td>
                         <td class="px-4 py-3 hide-mobile"><?php echo date('h:i A', strtotime($apt['appointment_time'])); ?> - <?php echo date('h:i A', strtotime($apt['end_time'])); ?></td>
-                        <td class="px-4 py-3 text-green-600 font-medium hide-mobile">MMK<?php echo number_format($apt['service_price'], 2); ?></td>
+                        <td class="px-4 py-3 text-blue-600 font-medium hide-mobile">MMK<?php echo number_format($apt['service_price'], 2); ?></td>
                         <td class="px-4 py-3">
                             <span class="px-2 py-1 text-xs rounded-full 
                             <?php echo match ($apt['status']) {
                                 'pending' => 'bg-yellow-100 text-yellow-700',
                                 'confirmed' => 'bg-blue-100 text-blue-700',
-                                'completed' => 'bg-green-100 text-green-700',
+                                'completed' => 'bg-blue-100 text-blue-700',
                                 'in_progress' => 'bg-purple-100 text-purple-700',
                                 'cancelled' => 'bg-red-100 text-red-700',
                                 default => 'bg-gray-100 text-gray-700'
@@ -233,12 +242,14 @@ require_once '../includes/header.php';
                                 <form method="POST" class="flex space-x-1 status-form" data-apt-id="<?php echo $apt['id']; ?>">
                                     <input type="hidden" name="action" value="update_status">
                                     <input type="hidden" name="id" value="<?php echo $apt['id']; ?>">
-                                    <select name="status" class="text-xs border border-gray-300 rounded px-1 py-0.5 status-select" data-current="<?php echo $apt['status']; ?>">
+                                    <select name="status" class="text-xs border border-gray-300 rounded px-1 py-0.5 status-select" data-current="<?php echo $apt['status']; ?>" data-apt-date="<?php echo $apt['appointment_date']; ?>" data-end-time="<?php echo $apt['end_time']; ?>">
+                                        <?php
+                                            $apt_end_ts = strtotime($apt['appointment_date'] . ' ' . $apt['end_time']);
+                                            $can_complete = $apt_end_ts <= time() || $apt['status'] === 'completed';
+                                        ?>
                                         <option value="pending" <?php echo $apt['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
                                         <option value="confirmed" <?php echo $apt['status'] === 'confirmed' ? 'selected' : ''; ?>>Confirmed</option>
-                                        <option value="in_progress" <?php echo $apt['status'] === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                        <option value="completed" <?php echo $apt['status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                        <option value="cancelled" <?php echo $apt['status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                        <option value="completed" <?php echo $apt['status'] === 'completed' ? 'selected' : ''; ?> <?php echo !$can_complete ? 'disabled' : ''; ?>>Completed</option>
                                     </select>
                                 </form>
                                 <form method="POST" class="flex space-x-1">
@@ -259,7 +270,7 @@ require_once '../includes/header.php';
                 <?php endforeach; ?>
                 <?php if (empty($appointments)): ?>
                     <tr>
-                        <td colspan="10" class="px-4 py-8 text-center text-gray-400">No appointments found.</td>
+                        <td colspan="8" class="px-4 py-8 text-center text-gray-400">No appointments found.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -277,22 +288,14 @@ document.querySelectorAll('.status-select').forEach(function(sel) {
 
         if (newStatus === currentStatus) return;
 
-        var statusColors = {
-            'pending': '#f59e0b',
-            'confirmed': '#3b82f6',
-            'in_progress': '#8b5cf6',
-            'completed': '#10b981',
-            'cancelled': '#ef4444'
-        };
-
         Swal.fire({
             title: 'Change Status?',
-            html: 'Set appointment <strong>#' + aptId + '</strong> to <strong style="color:' + (statusColors[newStatus] || '#6b7280') + '">' + newStatus.replace('_', ' ').toUpperCase() + '</strong>?',
+            html: 'Appointment status will be changed.',
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#059669',
+            confirmButtonColor: '#3578c0',
             cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, Update',
+            confirmButtonText: 'OK',
             cancelButtonText: 'Cancel'
         }).then(function(result) {
             if (result.isConfirmed) {
@@ -306,7 +309,7 @@ document.querySelectorAll('.status-select').forEach(function(sel) {
 </script>
 <script>
 function fetchUpcoming() {
-    fetch('/nail/includes/upcoming_appointments_api.php')
+    fetch('/nail_salon/includes/upcoming_appointments_api.php')
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.error || !data.appointments.length) {
@@ -340,14 +343,14 @@ function fetchUpcoming() {
                 html += '        ' + timeBadge;
                 html += '      </div>';
                 html += '      <p class="text-xs text-gray-500 mt-0.5">' + escapeHtml(apt.service_name) + ' &mdash; ' + apt.time + ' - ' + apt.end_time + '</p>';
-                html += '      <p class="text-xs text-gray-400 mt-0.5"><i class="fas fa-user-tie mr-1"></i>' + escapeHtml(apt.staff_name) + (apt.seat_label ? ' &middot; <i class="fas fa-chair mr-1"></i>' + escapeHtml(apt.seat_label) : '') + '</p>';
+                html += '      <p class="text-xs text-gray-400 mt-0.5"><i class="fas fa-user-tie mr-1"></i>' + escapeHtml(apt.staff_name) + '</p>';
                 if (apt.customer_phone) {
                     html += '      <p class="text-xs text-gray-400 mt-0.5"><i class="fas fa-phone mr-1"></i>' + escapeHtml(apt.customer_phone) + '</p>';
                 }
                 html += '    </div>';
                 html += '  </div>';
                 html += '  <div class="flex items-center gap-2 ml-13 sm:ml-0">';
-                html += '    <button type="button" class="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1 confirm-btn" data-apt-id="' + apt.id + '" data-customer="' + escapeHtml(apt.customer_name) + '" data-service="' + escapeHtml(apt.service_name) + '" data-time="' + apt.time + '">';
+                html += '    <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1 confirm-btn" data-apt-id="' + apt.id + '" data-customer="' + escapeHtml(apt.customer_name) + '" data-service="' + escapeHtml(apt.service_name) + '" data-time="' + apt.time + '">';
                 html += '      <i class="fas fa-check"></i> Confirm';
                 html += '    </button>';
                 html += '    <button type="button" class="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1 no-show-btn" data-apt-id="' + apt.id + '" data-customer="' + escapeHtml(apt.customer_name) + '" data-service="' + escapeHtml(apt.service_name) + '" data-time="' + apt.time + '">';
@@ -370,7 +373,7 @@ function fetchUpcoming() {
                         html: 'Is <strong>' + customer + '</strong> coming for <strong>' + service + '</strong> at <strong>' + time + '</strong>?',
                         icon: 'question',
                         showCancelButton: true,
-                        confirmButtonColor: '#059669',
+                        confirmButtonColor: '#3578c0',
                         cancelButtonColor: '#6b7280',
                         confirmButtonText: 'Yes, Confirmed',
                         cancelButtonText: 'Cancel'
@@ -378,7 +381,7 @@ function fetchUpcoming() {
                         if (result.isConfirmed) {
                             var form = document.createElement('form');
                             form.method = 'POST';
-                            form.action = '/nail/admin/appointments.php';
+                            form.action = '/nail_salon/admin/appointments.php';
                             form.innerHTML = '<input type="hidden" name="action" value="update_status"><input type="hidden" name="id" value="' + aptId + '"><input type="hidden" name="status" value="confirmed">';
                             document.body.appendChild(form);
                             form.submit();
@@ -407,7 +410,7 @@ function fetchUpcoming() {
                         if (result.isConfirmed) {
                             var form = document.createElement('form');
                             form.method = 'POST';
-                            form.action = '/nail/admin/appointments.php';
+                            form.action = '/nail_salon/admin/appointments.php';
                             form.innerHTML = '<input type="hidden" name="action" value="update_status"><input type="hidden" name="id" value="' + aptId + '"><input type="hidden" name="status" value="cancelled">';
                             document.body.appendChild(form);
                             form.submit();
@@ -435,7 +438,7 @@ Swal.fire({
     icon: 'error',
     title: 'Error',
     text: '<?php echo $swal_error; ?>',
-    confirmButtonColor: '#059669'
+    confirmButtonColor: '#3578c0'
 });
 </script>
 <?php endif; ?>

@@ -25,10 +25,10 @@ $recent_notifs = isLoggedIn() ? getRecentNotifications($pdo, $_SESSION['user_id'
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avocado Nail - <?php echo $title ?? 'Dashboard'; ?></title>
+    <title>Bluberry Nail Art Studio - <?php echo $title ?? 'Dashboard'; ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="/nail/assets/css/style.css">
+    <link rel="stylesheet" href="/nail_salon/assets/css/style.css?v=<?php echo time(); ?>">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -46,7 +46,7 @@ $recent_notifs = isLoggedIn() ? getRecentNotifications($pdo, $_SESSION['user_id'
     });
     var _lastUnreadCount = <?php echo $unread_count; ?>;
     function pollNotifications() {
-        fetch('/nail/includes/notifications_api.php')
+        fetch('/nail_salon/includes/notifications_api.php')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.error) return;
@@ -85,7 +85,7 @@ $recent_notifs = isLoggedIn() ? getRecentNotifications($pdo, $_SESSION['user_id'
                 var role = isAdmin ? 'admin' : 'customer';
                     var html = '';
                     data.notifications.forEach(function(n) {
-                        html += '<a href="/nail/' + role + '/notifications.php' + (n.appointment_id ? '?appointment_id=' + n.appointment_id : '') + '" class="notif-item ' + (n.is_read ? '' : 'notif-unread') + '">';
+                        html += '<a href="/nail_salon/' + role + '/notifications.php' + (n.appointment_id ? '?appointment_id=' + n.appointment_id : '') + '" class="notif-item ' + (n.is_read ? '' : 'notif-unread') + '">';
                         html += '<p class="notif-title">' + n.title + '</p>';
                         html += '<p class="notif-msg">' + n.message + '</p>';
                         html += '<p class="notif-time">' + n.created_at + '</p>';
@@ -105,27 +105,29 @@ $recent_notifs = isLoggedIn() ? getRecentNotifications($pdo, $_SESSION['user_id'
     <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
     <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-brand">
-            <a href="/nail/admin/dashboard.php">
-                <i class="fas fa-leaf" style="color:#7cb342;font-size:1.3rem"></i>
-                <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.15rem;color:#4d6a35">Avocado Nail</span>
+            <a href="/nail_salon/admin/dashboard.php" class="admin-logo">
+                <span class="admin-logo-icon"><i class="fas fa-spa"></i></span>
+                <span class="admin-logo-text-wrap">
+                    <span class="admin-logo-text">Blueberry</span>
+                    <span class="admin-logo-subtitle">Nail Art Studio</span>
+                </span>
             </a>
             <button id="sidebarClose" class="admin-sidebar-close"><i class="fas fa-times"></i></button>
         </div>
         <nav class="admin-sidebar-nav">
-            <a href="/nail/admin/dashboard.php" class="admin-sidebar-link <?php echo $currentPage==='dashboard.php'?'active':''; ?>"><i class="fas fa-home"></i><span>Dashboard</span></a>
-            <a href="/nail/admin/categories.php" class="admin-sidebar-link <?php echo $currentPage==='categories.php'?'active':''; ?>"><i class="fas fa-tags"></i><span>Categories</span></a>
-            <a href="/nail/admin/services.php" class="admin-sidebar-link <?php echo $currentPage==='services.php'?'active':''; ?>"><i class="fas fa-hand-sparkles"></i><span>Services</span></a>
-            <a href="/nail/admin/staff.php" class="admin-sidebar-link <?php echo $currentPage==='staff.php'?'active':''; ?>"><i class="fas fa-users"></i><span>Staff</span></a>
-            <a href="/nail/admin/appointments.php" class="admin-sidebar-link <?php echo $currentPage==='appointments.php'?'active':''; ?>"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
-            <a href="/nail/admin/customers.php" class="admin-sidebar-link <?php echo $currentPage==='customers.php'?'active':''; ?>"><i class="fas fa-user-friends"></i><span>Customers</span></a>
-            <a href="/nail/admin/reports.php" class="admin-sidebar-link <?php echo $currentPage==='reports.php'?'active':''; ?>"><i class="fas fa-chart-bar"></i><span>Reports</span></a>
-            <a href="/nail/admin/seats.php" class="admin-sidebar-link <?php echo $currentPage==='seats.php'?'active':''; ?>"><i class="fas fa-chair"></i><span>Seats</span></a>
+            <a href="/nail_salon/admin/dashboard.php" class="admin-sidebar-link <?php echo $currentPage==='dashboard.php'?'active':''; ?>"><i class="fas fa-home"></i><span>Dashboard</span></a>
+            <a href="/nail_salon/admin/categories.php" class="admin-sidebar-link <?php echo $currentPage==='categories.php'?'active':''; ?>"><i class="fas fa-tags"></i><span>Service Categories</span></a>
+            <a href="/nail_salon/admin/services.php" class="admin-sidebar-link <?php echo $currentPage==='services.php'?'active':''; ?>"><i class="fas fa-hand-sparkles"></i><span>Services</span></a>
+            <a href="/nail_salon/admin/staff.php" class="admin-sidebar-link <?php echo $currentPage==='staff.php'?'active':''; ?>"><i class="fas fa-users"></i><span>Staff</span></a>
+            <a href="/nail_salon/admin/appointments.php" class="admin-sidebar-link <?php echo $currentPage==='appointments.php'?'active':''; ?>"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
+            <a href="/nail_salon/admin/customers.php" class="admin-sidebar-link <?php echo $currentPage==='customers.php'?'active':''; ?>"><i class="fas fa-user-friends"></i><span>Customers</span></a>
+            <a href="/nail_salon/admin/reports.php" class="admin-sidebar-link <?php echo $currentPage==='reports.php'?'active':''; ?>"><i class="fas fa-chart-bar"></i><span>Reports</span></a>
             <a href="javascript:void(0)" onclick="toggleNotifDropdown('adminNotifDropdown')" class="admin-sidebar-link <?php echo $currentPage==='notifications.php'?'active':''; ?>" data-notif-bell><i class="fas fa-bell"></i><span>Notifications</span><span class="admin-sidebar-badge notif-badge-count" style="<?php echo $unread_count<=0?'display:none;':''; ?>"><?php echo $unread_count>9?'9+':$unread_count; ?></span></a>
             <div class="admin-notif-dropdown hidden" id="adminNotifDropdown">
                 <div class="notif-dropdown-header">
                     <span>Notifications</span>
                     <?php if ($unread_count > 0): ?>
-                        <a href="/nail/admin/notifications.php?mark_read=all" class="text-xs text-emerald-600">Mark all read</a>
+                        <a href="/nail_salon/admin/notifications.php?mark_read=all" class="text-xs text-blue-600">Mark all read</a>
                     <?php endif; ?>
                 </div>
                 <div class="notif-dropdown-body">
@@ -133,7 +135,7 @@ $recent_notifs = isLoggedIn() ? getRecentNotifications($pdo, $_SESSION['user_id'
                         <p class="text-xs text-gray-400 text-center py-6">No notifications yet</p>
                     <?php else: ?>
                         <?php foreach ($recent_notifs as $n): ?>
-                            <a href="/nail/admin/notifications.php<?php echo $n['appointment_id'] ? '?appointment_id=' . $n['appointment_id'] : ''; ?>" class="notif-item <?php echo $n['is_read'] ? '' : 'notif-unread'; ?>">
+                            <a href="/nail_salon/admin/notifications.php<?php echo $n['appointment_id'] ? '?appointment_id=' . $n['appointment_id'] : ''; ?>" class="notif-item <?php echo $n['is_read'] ? '' : 'notif-unread'; ?>">
                                 <p class="notif-title"><?php echo htmlspecialchars($n['title']); ?></p>
                                 <p class="notif-msg"><?php echo htmlspecialchars($n['message']); ?></p>
                                 <p class="notif-time"><?php echo date('M d, h:i A', strtotime($n['created_at'])); ?></p>
@@ -141,19 +143,19 @@ $recent_notifs = isLoggedIn() ? getRecentNotifications($pdo, $_SESSION['user_id'
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
-                <a href="/nail/admin/notifications.php" class="notif-view-all">View All</a>
+                <a href="/nail_salon/admin/notifications.php" class="notif-view-all">View All</a>
             </div>
         </nav>
         <div class="admin-sidebar-footer">
             <div class="admin-sidebar-user">
                 <?php if(!empty($_SESSION['image'])): ?>
-                    <img src="/nail/assets/images/<?php echo htmlspecialchars($_SESSION['image']); ?>" class="admin-sidebar-avatar">
+                    <img src="/nail_salon/assets/images/<?php echo htmlspecialchars($_SESSION['image']); ?>" class="admin-sidebar-avatar">
                 <?php else: ?>
                     <i class="fas fa-user-circle admin-sidebar-avatar-icon"></i>
                 <?php endif; ?>
                 <span class="admin-sidebar-username"><?php echo htmlspecialchars($_SESSION['full_name'] ?? 'Admin'); ?></span>
             </div>
-            <a href="/nail/auth/logout.php" class="admin-sidebar-link admin-sidebar-logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+            <a href="/nail_salon/auth/logout.php" class="admin-sidebar-link admin-sidebar-logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
         </div>
     </aside>
     <div class="admin-overlay" id="adminOverlay">    </div>
@@ -174,31 +176,39 @@ $recent_notifs = isLoggedIn() ? getRecentNotifications($pdo, $_SESSION['user_id'
     </script>
     <main class="admin-content">
 <?php else: ?>
+<?php $customerPage = basename($_SERVER['PHP_SELF']); ?>
 <nav class="navbar" id="navbar">
     <div class="container">
-        <a href="/nail/customer/dashboard.php" class="logo">
-            <i class="fas fa-leaf"></i> Avocado Nail
+        <a href="/nail_salon/customer/dashboard.php" class="logo">
+            <span class="logo-icon"><span class="logo-glow"></span><i class="fas fa-spa"></i></span>
+            <span class="logo-divider"></span>
+            <span class="logo-text-wrap">
+                <span class="logo-text">Blueberry</span>
+                <span class="logo-subtitle">Nail Art Studio</span>
+            </span>
         </a>
         <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
-            <i class="fas fa-bars"></i>
+            <span class="menu-bar"></span>
+            <span class="menu-bar"></span>
+            <span class="menu-bar"></span>
         </button>
         <ul class="nav-links" id="navLinks">
-            <li><a href="/nail/customer/dashboard.php">Home</a></li>
-            <li><a href="/nail/customer/services.php">Services</a></li>
-            <li><a href="/nail/customer/staff.php">Our Team</a></li>
-            <li><a href="/nail/customer/booking.php" class="btn-nav">Book Now</a></li>
-            <li><a href="/nail/customer/appointments.php">My Appointments</a></li>
-            <li><a href="/nail/customer/review.php">Reviews</a></li>
+            <li><a href="/nail_salon/customer/dashboard.php" class="nav-link-item <?php echo $customerPage==='dashboard.php'?'active':''; ?>">Home</a></li>
+            <li><a href="/nail_salon/customer/services.php" class="nav-link-item <?php echo $customerPage==='services.php'?'active':''; ?>">Services</a></li>
+            <li><a href="/nail_salon/customer/staff.php" class="nav-link-item <?php echo $customerPage==='staff.php'?'active':''; ?>">Our Team</a></li>
+            <li class="nav-separator"></li>
+            <li><a href="/nail_salon/customer/appointments.php" class="nav-btn-outline"><i class="fas fa-clock"></i> My Appointments</a></li>
+            <li><a href="/nail_salon/customer/booking.php" class="nav-btn-primary"><i class="fas fa-calendar-check"></i> Book Now</a></li>
             <li class="nav-notif-item">
-                <a href="javascript:void(0)" onclick="toggleNotifDropdown('customerNotifDropdown')" class="nav-notif-btn" data-notif-bell>
+                <a href="javascript:void(0)" onclick="toggleNotifDropdown('custNotifDropdown')" class="nav-notif-btn" data-notif-bell>
                     <i class="fas fa-bell"></i>
-                    <span class="nav-notif-badge notif-badge-count" style="<?php echo $unread_count<=0?'display:none;':''; ?>"><?php echo $unread_count > 9 ? '9+' : $unread_count; ?></span>
+                    <span class="notif-badge-count" style="<?php echo $unread_count<=0?'display:none;':''; ?>"><?php echo $unread_count>9?'9+':$unread_count; ?></span>
                 </a>
-                <div class="notif-dropdown hidden" id="customerNotifDropdown">
+                <div class="notif-dropdown hidden" id="custNotifDropdown">
                     <div class="notif-dropdown-header">
                         <span>Notifications</span>
                         <?php if ($unread_count > 0): ?>
-                            <a href="/nail/customer/notifications.php?mark_read=all" class="text-xs text-emerald-600">Mark all read</a>
+                            <a href="/nail_salon/customer/notifications.php?mark_read=all" class="text-xs text-blue-600">Mark all read</a>
                         <?php endif; ?>
                     </div>
                     <div class="notif-dropdown-body">
@@ -206,54 +216,95 @@ $recent_notifs = isLoggedIn() ? getRecentNotifications($pdo, $_SESSION['user_id'
                             <p class="text-xs text-gray-400 text-center py-6">No notifications yet</p>
                         <?php else: ?>
                             <?php foreach ($recent_notifs as $n): ?>
-                                <a href="/nail/customer/notifications.php<?php echo $n['appointment_id'] ? '?appointment_id=' . $n['appointment_id'] : ''; ?>" class="notif-item <?php echo $n['is_read'] ? '' : 'notif-unread'; ?>">
+                                <a href="/nail_salon/customer/notifications.php<?php echo $n['appointment_id'] ? '?appointment_id=' . $n['appointment_id'] : ''; ?>" class="notif-item <?php echo $n['is_read'] ? '' : 'notif-unread'; ?>">
                                     <p class="notif-title"><?php echo htmlspecialchars($n['title']); ?></p>
                                     <p class="notif-msg"><?php echo htmlspecialchars($n['message']); ?></p>
                                     <p class="notif-time"><?php echo date('M d, h:i A', strtotime($n['created_at'])); ?></p>
                                 </a>
-                            <?php endforeach; ?> 
+                            <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
-                    <a href="/nail/customer/notifications.php" class="notif-view-all">View All</a>
+                    <a href="/nail_salon/customer/notifications.php" class="notif-view-all">View All</a>
                 </div>
             </li>
             <li class="nav-user-item">
                 <a href="javascript:void(0)" onclick="toggleUserDropdown()" class="nav-user-btn">
                     <?php if (!empty($_SESSION['image'])): ?>
-                        <img src="/nail/assets/images/<?php echo htmlspecialchars($_SESSION['image']); ?>" class="w-7 h-7 rounded-full object-cover">
+                        <img src="/nail_salon/assets/images/<?php echo htmlspecialchars($_SESSION['image']); ?>" class="nav-user-avatar">
                     <?php else: ?>
-                        <i class="fas fa-user-circle"></i>
+                        <i class="fas fa-user-circle nav-user-icon"></i>
                     <?php endif; ?>
-                    <span><?php echo htmlspecialchars(explode(' ', $_SESSION['full_name'] ?? 'User')[0]); ?></span>
-                    <i class="fas fa-chevron-down" style="font-size:0.7rem;margin-left:0.3rem;"></i>
+                    <span class="nav-user-name"><?php echo htmlspecialchars(explode(' ', $_SESSION['full_name'] ?? 'User')[0]); ?></span>
+                    <i class="fas fa-chevron-down nav-chevron"></i>
                 </a>
                 <div class="user-dropdown" id="userDropdown">
-                    <a href="/nail/customer/profile.php"><i class="fas fa-user-edit"></i> Profile</a>
-                    <a href="/nail/auth/change-password.php"><i class="fas fa-key"></i> Change Password</a>
+                    <a href="/nail_salon/customer/review.php"><i class="fas fa-star"></i> Reviews</a>
                     <hr>
-                    <a href="/nail/auth/logout.php" style="color:#dc2626;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <a href="/nail_salon/customer/profile.php"><i class="fas fa-user-edit"></i> Profile</a>
+                    <a href="/nail_salon/auth/change-password.php"><i class="fas fa-key"></i> Change Password</a>
+                    <hr>
+                    <a href="/nail_salon/auth/logout.php" style="color:#dc2626;"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
             </li>
         </ul>
     </div>
 </nav>
+
+<div class="nav-drawer-overlay" id="navOverlay"></div>
+<div class="nav-drawer" id="navDrawer">
+    <div class="nav-drawer-header">
+        <div class="nav-drawer-user">
+            <?php if (!empty($_SESSION['image'])): ?>
+                <img src="/nail_salon/assets/images/<?php echo htmlspecialchars($_SESSION['image']); ?>" class="nav-drawer-avatar">
+            <?php else: ?>
+                <div class="nav-drawer-avatar-placeholder"><i class="fas fa-user"></i></div>
+            <?php endif; ?>
+            <div>
+                <p class="nav-drawer-name"><?php echo htmlspecialchars($_SESSION['full_name'] ?? 'User'); ?></p>
+                <p class="nav-drawer-subtitle">Customer</p>
+            </div>
+        </div>
+        <button class="nav-drawer-close" id="navDrawerClose"><i class="fas fa-times"></i></button>
+    </div>
+    <nav class="nav-drawer-nav">
+        <a href="/nail_salon/customer/dashboard.php" class="nav-drawer-link <?php echo $customerPage==='dashboard.php'?'active':''; ?>"><span>Home</span></a>
+        <a href="/nail_salon/customer/services.php" class="nav-drawer-link <?php echo $customerPage==='services.php'?'active':''; ?>"><span>Services</span></a>
+        <a href="/nail_salon/customer/staff.php" class="nav-drawer-link <?php echo $customerPage==='staff.php'?'active':''; ?>"><span>Our Team</span></a>
+         <div class="nav-drawer-divider"></div>
+        <a href="/nail_salon/customer/appointments.php" class="nav-drawer-link <?php echo $customerPage==='appointments.php'?'active':''; ?>"><i class="fas fa-clock"></i><span>My Appointments</span></a>
+        <a href="/nail_salon/customer/booking.php" class="nav-drawer-link nav-drawer-primary-link"><i class="fas fa-calendar-check"></i><span>Book Now</span></a>
+        <a href="/nail_salon/customer/notifications.php" class="nav-drawer-link <?php echo $customerPage==='notifications.php'?'active':''; ?>">
+            <i class="fas fa-bell"></i><span>Notifications</span>
+            <?php if ($unread_count > 0): ?>
+                <span class="nav-drawer-badge"><?php echo $unread_count > 9 ? '9+' : $unread_count; ?></span>
+            <?php endif; ?>
+        </a>
+        <div class="nav-drawer-divider"></div>
+        <a href="/nail_salon/customer/review.php" class="nav-drawer-link <?php echo $customerPage==='review.php'?'active':''; ?>"><i class="fas fa-star"></i><span>Reviews</span></a>
+        <a href="/nail_salon/customer/profile.php" class="nav-drawer-link <?php echo $customerPage==='profile.php'?'active':''; ?>"><i class="fas fa-user-edit"></i><span>Profile</span></a>
+        <a href="/nail_salon/auth/change-password.php" class="nav-drawer-link"><i class="fas fa-key"></i><span>Change Password</span></a>
+        <div class="nav-drawer-divider"></div>
+        <a href="/nail_salon/auth/logout.php" class="nav-drawer-link nav-drawer-logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+    </nav>
+</div>
+
 <div class="nav-js">
 <script>
 function toggleUserDropdown() {
-    const dd = document.getElementById('userDropdown');
+    var dd = document.getElementById('userDropdown');
     dd.classList.toggle('show');
 }
 
 document.addEventListener('click', function(e) {
-    const btn = document.querySelector('.nav-user-btn');
-    const dd = document.getElementById('userDropdown');
+    var btn = document.querySelector('.nav-user-btn');
+    var dd = document.getElementById('userDropdown');
     if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
         dd.classList.remove('show');
     }
 });
 
-const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => {
+var navbar = document.getElementById('navbar');
+window.addEventListener('scroll', function() {
     if (window.scrollY > 50) {
         navbar.classList.add('scrolled');
     } else {
@@ -261,27 +312,38 @@ window.addEventListener('scroll', () => {
     }
 });
 
-const menuToggle = document.getElementById('menuToggle');
-const navLinks = document.getElementById('navLinks');
-if (menuToggle) {
-    menuToggle.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        const icon = menuToggle.querySelector('i');
-        if (icon) {
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
-        }
-    });
+var menuToggle = document.getElementById('menuToggle');
+var navDrawer = document.getElementById('navDrawer');
+var navOverlay = document.getElementById('navOverlay');
+var navDrawerClose = document.getElementById('navDrawerClose');
+
+function openDrawer() {
+    navDrawer.classList.add('open');
+    navOverlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    menuToggle.classList.add('active');
 }
 
-navLinks.querySelectorAll('a:not(.nav-user-btn)').forEach(link => {
-    link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
-        menuToggle.querySelector('i')?.classList.add('fa-bars');
-        menuToggle.querySelector('i')?.classList.remove('fa-times');
-    });
+function closeDrawer() {
+    navDrawer.classList.remove('open');
+    navOverlay.classList.remove('show');
+    document.body.style.overflow = '';
+    menuToggle.classList.remove('active');
+}
+
+if (menuToggle) menuToggle.addEventListener('click', function() {
+    if (navDrawer.classList.contains('open')) closeDrawer();
+    else openDrawer();
+});
+if (navOverlay) navOverlay.addEventListener('click', closeDrawer);
+if (navDrawerClose) navDrawerClose.addEventListener('click', closeDrawer);
+navDrawer.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', closeDrawer);
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && navDrawer.classList.contains('open')) closeDrawer();
 });
 </script>
 </div>
-<main class="max-w-7xl mx-auto px-4 py-6 pt-20">
+<main>
 <?php endif; ?>

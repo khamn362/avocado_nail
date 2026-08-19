@@ -69,18 +69,35 @@ require_once '../includes/header.php';
     <h1 class="text-2xl font-bold text-gray-800">Reports</h1>
 
     <div class="flex flex-wrap gap-2">
-        <a href="?type=daily" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $report_type === 'daily' ? 'bg-emerald-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'; ?>">
+        <a href="?type=daily" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $report_type === 'daily' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'; ?>">
             <i class="fas fa-calendar-day mr-2"></i>Daily Report
         </a>
-        <a href="?type=monthly" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $report_type === 'monthly' ? 'bg-emerald-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'; ?>">
+        <a href="?type=monthly" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $report_type === 'monthly' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'; ?>">
             <i class="fas fa-calendar-alt mr-2"></i>Monthly Report
         </a>
-        <a href="?type=appointments" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $report_type === 'appointments' ? 'bg-emerald-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'; ?>">
+        <a href="?type=appointments" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $report_type === 'appointments' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'; ?>">
             <i class="fas fa-clock mr-2"></i>Appointment Report
         </a>
-        <a href="?type=popular" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $report_type === 'popular' ? 'bg-emerald-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'; ?>">
+        <a href="?type=popular" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $report_type === 'popular' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'; ?>">
             <i class="fas fa-star mr-2"></i>Popular Services
         </a>
+        <div class="relative" id="monthlyRevenueWrap">
+            <button onclick="document.getElementById('monthlyRevenueDD').classList.toggle('hidden')" class="px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-600 border hover:bg-gray-50 inline-flex items-center">
+                <i class="fas fa-dollar-sign mr-2"></i>Monthly Revenue <i class="fas fa-chevron-down ml-2 text-xs"></i>
+            </button>
+            <div id="monthlyRevenueDD" class="hidden absolute left-0 mt-2 w-56 bg-white border rounded-xl shadow-lg z-50 py-2 max-h-72 overflow-y-auto">
+                <?php
+                $now = new DateTime();
+                for ($i = 0; $i <= 11; $i++) {
+                    $monthDate = clone $now;
+                    $monthDate->modify('-' . $i . ' months');
+                    $monthVal = $monthDate->format('Y-m');
+                    $monthLabel = $monthDate->format('M Y');
+                    echo '<a href="?type=monthly&month=' . $monthVal . '" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">' . $monthLabel . '</a>';
+                }
+                ?>
+            </div>
+        </div>
     </div>
 
     <?php if ($report_type === 'daily'): ?>
@@ -107,10 +124,10 @@ require_once '../includes/header.php';
             <div class="bg-white rounded-xl shadow-sm border p-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 no-print">
                     <h3 class="text-lg font-semibold">
-                        <i class="fas fa-calendar-day text-emerald-500 mr-2"></i>Daily Revenue Report
+                        <i class="fas fa-calendar-day text-blue-500 mr-2"></i>Daily Revenue Report
                     </h3>
                     <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                        <a href="export_report.php?type=daily&date=<?php echo $date; ?>" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 inline-flex items-center">
+                        <a href="export_report.php?type=daily&date=<?php echo $date; ?>" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 inline-flex items-center">
                             <i class="fas fa-file-excel mr-2"></i>Export Excel
                         </a>
                         <button onclick="window.print()" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 inline-flex items-center">
@@ -124,7 +141,7 @@ require_once '../includes/header.php';
                 </div>
                 <div class="text-center mb-6">
                     <p class="text-sm text-gray-500">Total Revenue for <?php echo date('F d, Y', strtotime($date)); ?></p>
-                    <p class="text-4xl font-bold text-green-600">MMK<?php echo number_format($daily_total, 2); ?></p>
+                    <p class="text-4xl font-bold text-blue-600">MMK<?php echo number_format($daily_total, 2); ?></p>
                     <p class="text-sm text-gray-400"><?php echo count($daily); ?> completed appointment(s)</p>
                 </div>
                 <div class="overflow-x-auto">
@@ -145,12 +162,12 @@ require_once '../includes/header.php';
                                     <td class="px-4 py-2"><?php echo htmlspecialchars($d['service_name']); ?></td>
                                     <td class="px-4 py-2"><?php echo htmlspecialchars($d['staff_name']); ?></td>
                                     <td class="px-4 py-2"><?php echo date('h:i A', strtotime($d['appointment_time'])); ?></td>
-                                    <td class="px-4 py-2 text-green-600">MMK<?php echo number_format($d['service_price'], 2); ?></td>
+                                    <td class="px-4 py-2 text-blue-600">MMK<?php echo number_format($d['service_price'], 2); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                             <tr class="font-bold">
                                 <td colspan="4" class="px-4 py-2 text-right">Total:</td>
-                                <td class="px-4 py-2 text-green-600">MMK<?php echo number_format($daily_total, 2); ?></td>
+                                <td class="px-4 py-2 text-blue-600">MMK<?php echo number_format($daily_total, 2); ?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -182,10 +199,10 @@ require_once '../includes/header.php';
             <div class="bg-white rounded-xl shadow-sm border p-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 no-print">
                     <h3 class="text-lg font-semibold">
-                        <i class="fas fa-calendar-alt text-emerald-500 mr-2"></i>Monthly Revenue Report
+                        <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>Monthly Revenue Report
                     </h3>
                     <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                        <a href="export_report.php?type=monthly&month=<?php echo $month; ?>" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 inline-flex items-center">
+                        <a href="export_report.php?type=monthly&month=<?php echo $month; ?>" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 inline-flex items-center">
                             <i class="fas fa-file-excel mr-2"></i>Export Excel
                         </a>
                         <button onclick="window.print()" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 inline-flex items-center">
@@ -199,7 +216,7 @@ require_once '../includes/header.php';
                 </div>
                 <div class="text-center mb-6">
                     <p class="text-sm text-gray-500">Total Revenue for <?php echo date('F Y', strtotime($month . '-01')); ?></p>
-                    <p class="text-4xl font-bold text-green-600">MMK<?php echo number_format($monthly_total, 2); ?></p>
+                    <p class="text-4xl font-bold text-blue-600">MMK<?php echo number_format($monthly_total, 2); ?></p>
                     <p class="text-sm text-gray-400"><?php echo count($monthly); ?> completed appointment(s)</p>
                 </div>
                 <div class="overflow-x-auto">
@@ -220,12 +237,12 @@ require_once '../includes/header.php';
                                     <td class="px-4 py-2"><?php echo htmlspecialchars($m['customer_name']); ?></td>
                                     <td class="px-4 py-2"><?php echo htmlspecialchars($m['service_name']); ?></td>
                                     <td class="px-4 py-2"><?php echo htmlspecialchars($m['staff_name']); ?></td>
-                                    <td class="px-4 py-2 text-green-600">MMK<?php echo number_format($m['service_price'], 2); ?></td>
+                                    <td class="px-4 py-2 text-blue-600">MMK<?php echo number_format($m['service_price'], 2); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                             <tr class="font-bold">
                                 <td colspan="4" class="px-4 py-2 text-right">Total:</td>
-                                <td class="px-4 py-2 text-green-600">MMK<?php echo number_format($monthly_total, 2); ?></td>
+                                <td class="px-4 py-2 text-blue-600">MMK<?php echo number_format($monthly_total, 2); ?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -274,7 +291,7 @@ require_once '../includes/header.php';
             'pending' => 'bg-yellow-100 text-yellow-700 border-yellow-300',
             'confirmed' => 'bg-blue-100 text-blue-700 border-blue-300',
             'in_progress' => 'bg-purple-100 text-purple-700 border-purple-300',
-            'completed' => 'bg-green-100 text-green-700 border-green-300',
+            'completed' => 'bg-blue-100 text-blue-700 border-blue-300',
             'cancelled' => 'bg-red-100 text-red-700 border-red-300',
         ];
         $status_icons = [
@@ -296,7 +313,7 @@ require_once '../includes/header.php';
             </div>
             <div class="bg-white rounded-xl shadow-sm border p-6 mb-6 no-print">
                 <div class="flex flex-wrap items-center justify-between gap-4">
-                    <h3 class="text-lg font-semibold"><i class="fas fa-calendar-alt text-emerald-500 mr-2"></i>Appointment Report</h3>
+                    <h3 class="text-lg font-semibold"><i class="fas fa-calendar-alt text-blue-500 mr-2"></i>Appointment Report</h3>
                     <form method="GET" class="flex flex-wrap items-center gap-2">
                         <input type="hidden" name="type" value="appointments">
                         <label class="text-sm text-gray-500">From:</label>
@@ -309,9 +326,9 @@ require_once '../includes/header.php';
                                 <option value="<?php echo $st; ?>" <?php echo $status_filter === $st ? 'selected' : ''; ?>><?php echo ucfirst(str_replace('_', ' ', $st)); ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <button type="submit" class="px-3 py-1.5 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700"><i class="fas fa-search mr-1"></i>Filter</button>
+                        <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"><i class="fas fa-search mr-1"></i>Filter</button>
                         <a href="?type=appointments" class="px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-lg hover:bg-gray-200"><i class="fas fa-undo mr-1"></i>Reset</a>
-                        <a href="export_report.php?type=appointments&date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&status=<?php echo $status_filter; ?>" class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
+                        <a href="export_report.php?type=appointments&date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&status=<?php echo $status_filter; ?>" class="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
                             <i class="fas fa-file-excel mr-1"></i>Export
                         </a>
                         <button onclick="window.print()" class="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
@@ -334,7 +351,7 @@ require_once '../includes/header.php';
                         </div>
                         <p class="text-2xl font-bold"><?php echo $st_data['count']; ?></p>
                         <p class="text-xs text-gray-400"><?php echo $pct; ?>% of total</p>
-                        <p class="text-xs text-green-600 font-medium">MMK<?php echo number_format($st_data['total'], 2); ?></p>
+                        <p class="text-xs text-blue-600 font-medium">MMK<?php echo number_format($st_data['total'], 2); ?></p>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -342,7 +359,7 @@ require_once '../includes/header.php';
             <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
                 <div class="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
                     <h4 class="font-semibold text-gray-700">
-                        <i class="fas fa-list mr-2 text-emerald-500"></i>Appointment List
+                        <i class="fas fa-list mr-2 text-blue-500"></i>Appointment List
                         <span class="text-sm font-normal text-gray-400 ml-2">(<?php echo $total_count; ?> appointment<?php echo $total_count !== 1 ? 's' : ''; ?>)</span>
                     </h4>
                 </div>
@@ -378,7 +395,7 @@ require_once '../includes/header.php';
                                         </td>
                                         <td class="px-4 py-3"><?php echo htmlspecialchars($a['service_name']); ?></td>
                                         <td class="px-4 py-3"><?php echo htmlspecialchars($a['staff_name']); ?></td>
-                                        <td class="px-4 py-3 text-green-600 font-medium">MMK<?php echo number_format($a['service_price'], 2); ?></td>
+                                        <td class="px-4 py-3 text-blue-600 font-medium">MMK<?php echo number_format($a['service_price'], 2); ?></td>
                                         <td class="px-4 py-3">
                                             <span class="px-2 py-1 text-xs rounded-full border font-medium
                                                 <?php echo $status_colors[$a['status']] ?? 'bg-gray-100 text-gray-700 border-gray-300'; ?>">
@@ -414,9 +431,9 @@ require_once '../includes/header.php';
             </div>
             <div class="bg-white rounded-xl shadow-sm border p-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 no-print">
-                    <h3 class="text-lg font-semibold"><i class="fas fa-star text-emerald-500 mr-2"></i>Popular Services Report</h3>
+                    <h3 class="text-lg font-semibold"><i class="fas fa-star text-blue-500 mr-2"></i>Popular Services Report</h3>
                     <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                        <a href="export_report.php?type=popular" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 inline-flex items-center">
+                        <a href="export_report.php?type=popular" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 inline-flex items-center">
                             <i class="fas fa-file-excel mr-2"></i>Export Excel
                         </a>
                         <button onclick="window.print()" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 inline-flex items-center">
@@ -433,12 +450,12 @@ require_once '../includes/header.php';
                                     <span class="text-xs text-gray-400 ml-2">(<?php echo htmlspecialchars($p['category_name']); ?>)</span>
                                 </div>
                                 <div class="text-sm">
-                                    <span class="text-green-600 font-medium">MMK<?php echo number_format($p['total_revenue'], 2); ?></span>
+                                    <span class="text-blue-600 font-medium">MMK<?php echo number_format($p['total_revenue'], 2); ?></span>
                                     <span class="text-gray-400 ml-2"><?php echo $p['booking_count']; ?> bookings</span>
                                 </div>
                             </div>
                             <div class="w-full bg-gray-100 rounded-full h-2.5">
-                                <div class="bg-emerald-500 h-2.5 rounded-full" style="width: <?php echo ($max_bookings > 0 ? ($p['booking_count'] / $max_bookings) * 100 : 0); ?>%"></div>
+                                <div class="bg-blue-500 h-2.5 rounded-full" style="width: <?php echo ($max_bookings > 0 ? ($p['booking_count'] / $max_bookings) * 100 : 0); ?>%"></div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -447,4 +464,13 @@ require_once '../includes/header.php';
         </div>
     <?php endif; ?>
 </div>
+<script>
+document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('monthlyRevenueWrap');
+    var dd = document.getElementById('monthlyRevenueDD');
+    if (wrap && dd && !wrap.contains(e.target)) {
+        dd.classList.add('hidden');
+    }
+});
+</script>
 <?php require_once '../includes/footer.php'; ?>

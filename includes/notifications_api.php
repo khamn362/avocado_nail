@@ -23,7 +23,7 @@ foreach ($notifications as $n) {
         'appointment_id' => $n['appointment_id'],
         'is_read' => (int) $n['is_read'],
         'created_at' => date('M d, h:i A', strtotime($n['created_at'])),
-        'link' => ($_SESSION['role'] === 'admin' ? '/nail/admin/' : '/nail/customer/') . 'notifications.php' . ($n['appointment_id'] ? '?appointment_id=' . $n['appointment_id'] : '')
+        'link' => ($_SESSION['role'] === 'admin' ? '/nail_salon/admin/' : '/nail_salon/customer/') . 'notifications.php' . ($n['appointment_id'] ? '?appointment_id=' . $n['appointment_id'] : '')
     ];
 }
 

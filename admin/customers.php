@@ -31,7 +31,7 @@ require_once '../includes/header.php';
         ?>
         <div class="bg-white rounded-xl shadow-sm border p-4">
             <p class="text-sm text-gray-500">Total Revenue from Customers</p>
-            <p class="text-2xl font-bold text-green-600">MMK<?php echo number_format($total_rev, 2); ?></p>
+            <p class="text-2xl font-bold text-blue-600">MMK<?php echo number_format($total_rev, 2); ?></p>
         </div>
     </div>
 
@@ -44,8 +44,8 @@ require_once '../includes/header.php';
                     <th class="px-6 py-3 text-left font-medium text-gray-500 hide-mobile">Phone</th>
                     <th class="px-6 py-3 text-left font-medium text-gray-500">Appointments</th>
                     <th class="px-6 py-3 text-left font-medium text-gray-500 hide-mobile">Completed</th>
-                    <th class="px-6 py-3 text-left font-medium text-gray-500">Total Spent</th>
-                    <th class="px-6 py-3 text-left font-medium text-gray-500 hide-mobile">Joined</th>
+                    <th class="px-6 py-3 text-left font-medium text-gray-500">Amount</th>
+                    <th class="px-6 py-3 text-left font-medium text-gray-500 hide-mobile">Booking Date</th>
                     <th class="px-6 py-3 text-left font-medium text-gray-500">Actions</th>
                 </tr>
             </thead>
@@ -57,10 +57,10 @@ require_once '../includes/header.php';
                     <td class="px-6 py-4 hide-mobile"><?php echo htmlspecialchars($c['phone'] ?? 'N/A'); ?></td>
                     <td class="px-6 py-4"><?php echo $c['total_appointments']; ?></td>
                     <td class="px-6 py-4 hide-mobile"><?php echo $c['completed_appointments']; ?></td>
-                    <td class="px-6 py-4 text-green-600 font-medium">MMK<?php echo number_format($c['total_spent'], 2); ?></td>
+                    <td class="px-6 py-4 text-blue-600 font-medium">MMK<?php echo number_format($c['total_spent'], 2); ?></td>
                     <td class="px-6 py-4 hide-mobile"><?php echo date('M d, Y', strtotime($c['created_at'])); ?></td>
                     <td class="px-6 py-4">
-                        <a href="?view=<?php echo $c['id']; ?>" class="text-emerald-600 hover:text-emerald-700">
+                        <a href="?view=<?php echo $c['id']; ?>" class="text-blue-600 hover:text-blue-700">
                             <i class="fas fa-eye"></i> View History
                         </a>
                     </td>
@@ -88,7 +88,7 @@ require_once '../includes/header.php';
     ?>
         <div class="bg-white rounded-xl shadow-sm border p-6">
             <h3 class="text-lg font-semibold mb-4">
-                <i class="fas fa-history text-emerald-500 mr-2"></i>
+                <i class="fas fa-history text-blue-500 mr-2"></i>
                 Appointment History - <?php echo htmlspecialchars($cust['full_name']); ?>
             </h3>
             <div class="overflow-x-auto">
@@ -115,7 +115,7 @@ require_once '../includes/header.php';
                                         'pending' => 'bg-yellow-100 text-yellow-700',
                                         'confirmed' => 'bg-blue-100 text-blue-700',
                                         'in_progress' => 'bg-purple-100 text-purple-700',
-                                        'completed' => 'bg-green-100 text-green-700',
+                                        'completed' => 'bg-blue-100 text-blue-700',
                                         'cancelled' => 'bg-red-100 text-red-700',
                                         default => 'bg-gray-100 text-gray-700'
                                     }; ?>">
@@ -127,7 +127,7 @@ require_once '../includes/header.php';
                     </tbody>
                 </table>
             </div>
-            <a href="customers.php" class="mt-4 inline-block text-emerald-600 hover:text-emerald-700 text-sm">&larr; Back to customers</a>
+            <a href="customers.php" class="mt-4 inline-block text-blue-600 hover:text-blue-700 text-sm">&larr; Back to customers</a>
         </div>
     <?php endif; ?>
 </div>

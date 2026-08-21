@@ -65,6 +65,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $appointment_id = $pdo->lastInsertId();
                 require_once '../includes/notifications.php';
                 notifyAdmins($pdo, 'new_booking', 'New Booking', $_SESSION['full_name'] . ' booked a new appointment.', $appointment_id);
+
+                require_once '../includes/sendmail.php';
+                $cust_stmt = $pdo->prepare("SELECT full_name, email FROM users WHERE id = ?");
+                $cust_stmt->execute([$_SESSION['user_id']]);
+                $customer = $cust_stmt->fetch();
+                if ($customer) {
+                    $names_stmt = $pdo->prepare("SELECT (SELECT name FROM services WHERE id = ?) AS service_name, (SELECT name FROM staff WHERE id = ?) AS staff_name");
+                    $names_stmt->execute([$service_id, $staff_id]);
+                    $names = $names_stmt->fetch();
+                    sendBookingEmail($customer['email'], $customer['full_name'], [
+                        'service_name'     => $names['service_name'] ?? '',
+                        'staff_name'       => $names['staff_name'] ?? '',
+                        'appointment_date' => $appointment_date,
+                        'appointment_time' => $start_time,
+                        'duration'         => $svc['duration'],
+                        'price'            => $svc['price'],
+                    ]);
+                }
+
                 $success = 'Appointment booked successfully! We will confirm your booking shortly.';
             }
         }

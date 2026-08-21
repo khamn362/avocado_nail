@@ -2,3 +2,4 @@
 # assets/images/*
 # !assets/uploads/.gitkeep
 # !assets/images/.gitkeep
+.env
